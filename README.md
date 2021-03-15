@@ -50,7 +50,7 @@ EfficientNetB0(include_top=True, weights=None, classes=NUM_CLASSES)(inputs)
  <img src="./epoch_loss2.svg">  
  
  ***Анализ результатов:*** 
-
+Как видно из графиков, точность с каждой эпохой возрастает и достигает 90+%, следовательно технология Transfer Learning позволяет улучшить качество обучения классификации для небольших датасетов 
 
 
 
