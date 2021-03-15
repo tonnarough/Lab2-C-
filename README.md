@@ -30,6 +30,7 @@ EfficientNetB0(include_top=True, weights=None, classes=NUM_CLASSES)(inputs)
 ***Transfer Learning*** - технология позволяющая использовать накопленный при решении одной задачи опыт для решения другой, аналогичной проблемы. Нейросеть сначала обучается на большом объеме данных, затем — на целевом наборе.
 В нашем случае мы работаем с нейронной сетью EfficientNetB0 и используюем заранее предобученные веса на базе изображений ImageNet. Архитектура нейронной сети принимает вид:
 ```
+  inputs = tf.keras.Input(shape=(RESIZE_TO, RESIZE_TO, 3))
   model = EfficientNetB0(input_tensor=inputs,include_top=False,pooling='avg', weights='imagenet')(inputs)
   model.trainable=False
   model = tf.keras.layers.Flatten()(model)
@@ -42,6 +43,13 @@ EfficientNetB0(include_top=True, weights=None, classes=NUM_CLASSES)(inputs)
 * **weights='imagenet'** - значит, что мы взяли заранее предобученные веса на базе 'imagenet'.
 * **model.trainable=False** - заморозка всех слоев и обучение только верхних.
 * Так же был уменьшен **lr - learning rate(скорость обучения)** c 0.001 до 0.0001
+
+***Линейная диаграмма точности:***
+<img src="./epoch_categorical_accuracy2.svg">
+***Линейная диаграмма потерь:*** 
+ <img src="./epoch_loss2.svg">  
+ 
+ ***Анализ результатов:*** 
 
 
 
