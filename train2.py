@@ -35,13 +35,9 @@ def parse_proto_example(proto):
   }
   example = tf.io.parse_single_example(proto, keys_to_features)
   example['image'] = tf.image.decode_jpeg(example['image/encoded'], channels=3)
-  example['image'] = tf.image.convert_image_dtype(example['image'], dtype=tf.float32)
+  example['image'] = tf.image.convert_image_dtype(example['image'], dtype=tf.uint8)
   example['image'] = tf.image.resize(example['image'], tf.constant([RESIZE_TO, RESIZE_TO]))
   return example['image'], tf.one_hot(example['image/label'], depth=NUM_CLASSES)
-
-
-def normalize(image, label):
-  return tf.image.per_image_standardization(image), label
 
 
 def create_dataset(filenames, batch_size):
@@ -52,16 +48,15 @@ def create_dataset(filenames, batch_size):
   return tf.data.TFRecordDataset(filenames)\
     .map(parse_proto_example, num_parallel_calls=tf.data.AUTOTUNE)\
     .cache()\
-    .map(normalize)\
     .batch(batch_size)\
     .prefetch(tf.data.AUTOTUNE)
 
 
 def build_model():
   inputs = tf.keras.Input(shape=(RESIZE_TO, RESIZE_TO, 3))
-  model = EfficientNetB0(input_tensor=inputs,include_top=False,pooling='avg', weights='imagenet')(inputs)
+  model = EfficientNetB0(input_tensor=inputs,include_top=False,pooling='avg', weights='imagenet')
   model.trainable=False
-  model = tf.keras.layers.Flatten()(model)
+  model = tf.keras.layers.Flatten()(model.output)
   outputs = tf.keras.layers.Dense(NUM_CLASSES, activation = tf.keras.activations.softmax)(model)
   return tf.keras.Model(inputs=inputs, outputs=outputs)
 
@@ -80,7 +75,7 @@ def main():
   print(model.summary())
 
   model.compile(
-    optimizer=tf.optimizers.Adam(lr=0.0001),
+    optimizer=tf.optimizers.Adam(lr=0.01),
     loss=tf.keras.losses.categorical_crossentropy,
     metrics=[tf.keras.metrics.categorical_accuracy],
   )
